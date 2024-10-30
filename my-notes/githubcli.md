@@ -7,13 +7,15 @@ Para instalação em Windows, recomendo utilizar o [chocolatey](https://chocolat
 
 ## Indice
 
-1. [Verifique se há chaves SSH em seu computador](#verifique-se-há-chaves-ssh-em-seu-computador)
-2. [Caso não haja um par de arquivos `chave` e `chave.pub`](#caso-não-haja-um-par-de-arquivos-chave-e-chavepub)
-3. [Adicionar sua chave SSH ao ssh-agent (no seu computador)](#adicionar-sua-chave-ssh-ao-ssh-agent-no-seu-computador)
-4. [Adicione sua chave SSH a sua conta no github (opcional)](#adicione-sua-chave-ssh-a-sua-conta-no-github-opcional)
-5. [Instalando o GH](#instalando-o-gh)
-6. [Configurando o GH](#configurando-o-gh)
-7. [Outras Referências](#outras-referências)
+- [Acessando o github no prompt com segurança](#acessando-o-github-no-prompt-com-segurança)
+  - [Indice](#indice)
+  - [Verifique se há chaves SSH em seu computador](#verifique-se-há-chaves-ssh-em-seu-computador)
+  - [Caso não haja um par de arquivos `chave` e `chave.pub`](#caso-não-haja-um-par-de-arquivos-chave-e-chavepub)
+  - [Adicionar sua chave SSH ao ssh-agent (no seu computador)](#adicionar-sua-chave-ssh-ao-ssh-agent-no-seu-computador)
+  - [Adicione sua chave SSH a sua conta no github (opcional)](#adicione-sua-chave-ssh-a-sua-conta-no-github-opcional)
+  - [Instalando o GH](#instalando-o-gh)
+  - [Configurando o GH](#configurando-o-gh)
+  - [Outras Referências](#outras-referências)
 
 
 ## Verifique se há chaves SSH em seu computador
@@ -165,6 +167,8 @@ $ gh config set editor nome_do_editor
 [Verifique se há chaves SSH em seu computador](https://docs.github.com/pt/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)
 
 [Gerando uma nova chave SSH e adicionando-a ao agente SSH](https://docs.github.com/pt/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+
+[GitHub CLI Manual](https://cli.github.com/manual/)
 
 [Instalando o GitHub CLI (gh)](https://github.com/cli/cli#installation)
 
