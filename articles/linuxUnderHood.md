@@ -129,3 +129,16 @@ Se os exemplos aqui não forem suficientes para suas necessidades, consulte as i
 Para fazer isso, basta digitar `lsblk -o +`, seguido pelos nomes das colunas que você deseja gerar. Separe os nomes das colunas com uma vírgula (“,”).
 
 Por exemplo: `# lsblk -o +SCHED,RM,FSTYPE`
+
+## Ferramenta para verificar informação sobre bateria
+
+```
+$ upower -e
+/org/freedesktop/UPower/devices/line_power_AC0
+/org/freedesktop/UPower/devices/battery_BAT0
+/org/freedesktop/UPower/devices/DisplayDevice
+
+$ upower -i /org/freedesktop/UPower/devices/battery_BAT0
+```
+
+Outras [opções](https://linuxavante.com/3-ferramentas-para-exibir-informacoes-da-bateria-do-laptop-do-linux-da-linha-de-comando)
