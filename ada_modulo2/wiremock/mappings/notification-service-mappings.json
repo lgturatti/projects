@@ -1,0 +1,20 @@
+{
+  "mappings": [
+    {
+      "name": "notification-order-approved",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/notifications"
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Notificação aceita para processamento assíncrono."
+        }
+      }
+    }
+  ]
+}

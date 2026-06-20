@@ -1,0 +1,74 @@
+{
+  "mappings": [
+    {
+      "name": "payment-gateway-approved",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/payment-gateway/charges",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.orderId"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "transactionId": "txn-approved-001",
+          "status": "APPROVED",
+          "message": "Pagamento aprovado com sucesso."
+        }
+      },
+      "priority": 5
+    },
+    {
+      "name": "payment-gateway-rejected",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/payment-gateway/charges",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.orderId[?(@=~ /.*rejected.*/)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "transactionId": "txn-rejected-001",
+          "status": "REJECTED",
+          "message": "Pagamento recusado pela operadora do cartão."
+        }
+      },
+      "priority": 3
+    },
+    {
+      "name": "payment-gateway-503",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/payment-gateway/charges",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.orderId[?(@=~ /.*unstable.*/)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Gateway de pagamento temporariamente indisponível."
+        }
+      },
+      "priority": 2
+    }
+  ]
+}

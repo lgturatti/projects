@@ -1,0 +1,82 @@
+{
+  "mappings": [
+    {
+      "name": "catalog-product-price",
+      "request": {
+        "method": "GET",
+        "url": "/catalog/products/product-001/price"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "productId": "product-001",
+          "price": 19.99
+        }
+      }
+    },
+    {
+      "name": "catalog-stock-available",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/catalog/products/product-001/stock",
+        "queryParameters": {
+          "quantity": {
+            "matches": "[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "productId": "product-001",
+          "availableQuantity": 100,
+          "stockStatus": "AVAILABLE"
+        }
+      }
+    },
+    {
+      "name": "catalog-product-not-found",
+      "request": {
+        "method": "GET",
+        "url": "/catalog/products/product-not-found-001/price"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Produto não encontrado no catálogo."
+        }
+      }
+    },
+    {
+      "name": "catalog-stock-insufficient",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/catalog/products/product-out-of-stock-001/stock",
+        "queryParameters": {
+          "quantity": {
+            "matches": "[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "productId": "product-out-of-stock-001",
+          "message": "Estoque insuficiente para a quantidade solicitada."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+services:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Order Service
+  # ───────────────────────────────────────────────────────────────────────────
+  order-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "8080:8080"
+      - "8090:8090"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-32chars!}
+      DB_URL: jdbc:mysql://mysql:3306/orderservice?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: ${DB_USERNAME:-orderuser}
+      DB_PASSWORD: ${DB_PASSWORD:-orderpass}
+      CUSTOMER_SERVICE_URL: http://wiremock:8080
+      CATALOG_SERVICE_URL: http://wiremock:8080
+      # Send traces to the local OpenTelemetry Collector instead of localhost:4318.
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
+    depends_on:
+      mysql:
+        condition: service_healthy
+      wiremock:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    networks:
+      - order-net
+    restart: on-failure
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # OpenTelemetry Collector — Local tracing sink
+  # ───────────────────────────────────────────────────────────────────────────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.111.0
+    container_name: otel-collector
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    ports:
+      - "4318:4318"
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    networks:
+      - order-net
+    depends_on:
+      - tempo
+    restart: unless-stopped
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Tempo — Trace storage and query API
+  # ───────────────────────────────────────────────────────────────────────────
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: tempo
+    user: "0:0"
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+    volumes:
+      - ./observability/tempo.yaml:/etc/tempo/config.yaml:ro
+      - tempo-data:/tmp/tempo
+    networks:
+      - order-net
+    restart: unless-stopped
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # MySQL
+  # ───────────────────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0.33
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: orderservice
+      MYSQL_USER: ${DB_USERNAME:-orderuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-orderpass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+    ports:
+      - "${MYSQL_HOST_PORT:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - order-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # WireMock — External service stubs (Customer & Catalog)
+  # ───────────────────────────────────────────────────────────────────────────
+  wiremock:
+    image: wiremock/wiremock:3.5.4
+    container_name: wiremock
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings:ro
+    networks:
+      - order-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/__admin/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Prometheus — Metrics collection
+  # ───────────────────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - order-net
+    depends_on:
+      - order-service
+    restart: unless-stopped
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Grafana — Metrics visualization
+  # ───────────────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - order-net
+    depends_on:
+      - prometheus
+      - tempo
+    restart: unless-stopped
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Volumes
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  mysql-data:
+  prometheus-data:
+  grafana-data:
+  tempo-data:
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Networks
+# ─────────────────────────────────────────────────────────────────────────────
+networks:
+  order-net:
+    driver: bridge

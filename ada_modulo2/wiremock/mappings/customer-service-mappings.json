@@ -1,0 +1,56 @@
+{
+  "mappings": [
+    {
+      "name": "customer-active",
+      "request": {
+        "method": "GET",
+        "url": "/customers/customer-active-001"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "customer-active-001",
+          "name": "João Silva",
+          "status": "ACTIVE"
+        }
+      }
+    },
+    {
+      "name": "customer-blocked",
+      "request": {
+        "method": "GET",
+        "url": "/customers/customer-blocked-001"
+      },
+      "response": {
+        "status": 422,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "customer-blocked-001",
+          "status": "BLOCKED",
+          "message": "Cliente bloqueado por inadimplência."
+        }
+      }
+    },
+    {
+      "name": "customer-not-found",
+      "request": {
+        "method": "GET",
+        "url": "/customers/customer-not-found-001"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Cliente não encontrado."
+        }
+      }
+    }
+  ]
+}
